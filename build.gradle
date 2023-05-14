@@ -1,0 +1,53 @@
+buildscript {
+    ext {
+        kafkaVersion = '3.2.3'
+        confluentVersion = '7.2.3'
+        micrometerVersion = '1.10.6'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+group 'ru.raiffeisen.sdp'
+version '0.0.1'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://packages.confluent.io/maven/"
+    }
+}
+
+dependencies {
+    implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
+    implementation "io.confluent:kafka-streams-avro-serde:${confluentVersion}"
+    implementation "io.micrometer:micrometer-core:${micrometerVersion}"
+    implementation "io.micrometer:micrometer-registry-prometheus:${micrometerVersion}"
+    implementation "io.prometheus:simpleclient_hotspot:0.16.0"
+    implementation "org.slf4j:slf4j-log4j12:1.7.32"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+shadowJar {
+    archiveBaseName.set('app')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'ru.raif.sdp.Application'
+        )
+    }
+}

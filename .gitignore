@@ -1,0 +1,9 @@
+# Default ignored files
+.idea/
+.gradle/
+build/
+
+files/krb5.conf
+raif_kafka.properties
+
+*.iml

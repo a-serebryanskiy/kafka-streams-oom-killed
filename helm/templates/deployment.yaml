@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs/multiline.match: after
+        co.elastic.logs/multiline.negate: "true"
+        co.elastic.logs/multiline.pattern: '^\[20\d\d\-\d\d-\d\d'
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/prometheus"
+        prometheus.io/port: "8080"
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ .Release.Name }}
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: app
+          # image: your-image-tag:0.0.1
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+          command:
+            - java
+          args:
+            - -XshowSettings:VM
+            # - -Xmx{{ .Values.heapSizeMb }}m
+            - -jar
+            - app.jar
+          ports:
+            - containerPort: 8080
+              name: app
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /prometheus
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /prometheus
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+          volumeMounts:
+            - mountPath: /opt/states
+              name: states-volume
+            - mountPath: /etc/configs
+              name: app-properties
+          env:
+            - name: CONFIG_FILE_PATH
+              value: /etc/configs/app.properties
+            - name: OS_MEMORY_PERCENTAGE
+              value: "0.1"
+              # computed it based on the jcmd output (see the presentation for details)
+            - name: OFF_HEAP_SIZE_MB
+              value: "128"
+            - name: MAX_HEAP_SIZE_MB
+              value: "{{ .Values.heapSizeMb }}"
+            - name: CONTAINER_MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: app
+                  resource: limits.memory
+      securityContext:
+        fsGroup: 2000
+        runAsGroup: 2000
+        runAsUser: 2000
+      volumes:
+        - name: sdp-keytab
+          secret:
+            secretName: srv-t-sdp-app-kafka
+        - name: app-properties
+          configMap:
+            name: {{ .Release.Name }}-props
+        - name: states-volume
+          emptyDir: {}

@@ -1,0 +1,29 @@
+{
+  "type": "record",
+  "name": "MyRecord",
+  "namespace": "ru.raiffeisen.sdp",
+  "fields": [
+    {
+      "name": "id",
+      "type":
+      {
+        "type": "string",
+        "arg.properties": {
+          "regex": "[a-zA-Z0-9]*",
+          "length": 18
+        }
+      }
+    },
+    {
+      "name": "my_value",
+      "type": {
+        "type": "int",
+        "connect.version": 1,
+        "connect.name": "io.debezium.time.Date",
+        "arg.properties": {
+          "range": {"min": 0, "max": 100000}
+        }
+      }
+    }
+  ]
+}

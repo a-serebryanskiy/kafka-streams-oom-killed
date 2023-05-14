@@ -1,0 +1,11 @@
+{
+  "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+  "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+  "value.converter": "io.confluent.connect.avro.AvroConverter",
+  "value.converter.schema.registry.url": "https://schema-registry-test.sdp-schema-registry-test.lb.k8s-dt-sdp-01.k8s.raiffeisen.ru",
+  "kafka.topic": "datagen.sdp.andrey-kafka-summit-test",
+  "max.interval": 10,
+  "schema.string": "{\n  \"type\": \"record\",\n  \"name\": \"MyRecord\",\n  \"namespace\": \"ru.raiffeisen.sdp\",\n  \"fields\": [\n    {\n      \"name\": \"id\",\n      \"type\":\n      {\n        \"type\": \"string\",\n        \"arg.properties\": {\n          \"regex\": \"[a-zA-Z0-9]*\",\n          \"length\": 18\n        }\n      }\n    },\n    {\n      \"name\": \"my_value\",\n      \"type\": {\n        \"type\": \"int\",\n        \"connect.version\": 1,\n        \"connect.name\": \"io.debezium.time.Date\",\n        \"arg.properties\": {\n          \"range\": {\"min\": 0, \"max\": 100000}\n        }\n      }\n    }\n  ]\n}",
+  "schema.keyfield": "id",
+  "tasks.max": 9
+}

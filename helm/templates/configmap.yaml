@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-props
+data:
+  app.properties: |-
+    application.id: kafka-streams-oom-killed
+    state.dir: /opt/states/app
+    bootstrap.servers: your-bootstrap-servers:9092
+    schema.registry.url: http://your-schema-registry-url
+
+
